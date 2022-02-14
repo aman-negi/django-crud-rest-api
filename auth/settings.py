@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
+import django_heroku
 
 from pathlib import Path
 
@@ -134,4 +135,7 @@ AUTH_USER_MODEL = 'users.User'
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ORIGIN_WHITELIST = 'http://127.0.0.1:8000','https://django-crud-rest-framework.herokuapp.com',
+CORS_ORIGIN_WHITELIST = ('http://127.0.0.1:8000','https://django-crud-rest-framework.herokuapp.com',)
+
+# Activate Django-Heroku.
+django_heroku.settings(locals())
