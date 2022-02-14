@@ -134,4 +134,4 @@ AUTH_USER_MODEL = 'users.User'
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ORIGIN_WHITELIST = 'http://127.0.0.1:8000',
+CORS_ORIGIN_WHITELIST = 'http://127.0.0.1:8000','https://django-crud-rest-framework.herokuapp.com',
