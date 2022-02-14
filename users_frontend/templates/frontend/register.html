@@ -1,0 +1,148 @@
+{% extends './base.html' %}
+
+{% block title %} SignUp {% endblock %}
+
+
+{% block head %}
+<script>
+    function loadData(){
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET","/api/user",true)
+        xmlhttp.onreadystatechange = function(){
+            if(xmlhttp.readyState === 4 && xmlhttp.status === 200){
+                location.replace('/profile')
+                var data = JSON.parse(xmlhttp.responseText);
+                console.log(data)
+                try{
+                    document.getElementById("name").innerHTML = data['name']
+                    location.replace('/profile')
+                }
+                catch(error){
+                    console.log('No twt token ')    
+                }
+            }
+            else{
+              console.log('No Twt token')
+            }
+        }
+        xmlhttp.send();
+    }
+    window.onload = function(){
+        loadData();
+    }
+</script>    
+{% endblock %}
+
+
+
+{% block body %}
+<div class="flex flex-col items-center mt-20 place-content-center">
+    <div class="text-[25px]">
+        Register 
+    </div>    
+    <div class="w-full max-w-xs">
+        <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="registerform">
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                  Name
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" type="text" placeholder="name">
+              </div>
+              <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="address">
+                  Address
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="address" type="text" placeholder="address..">
+              </div>   
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+              E-mail
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="email">
+          </div>
+          <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+              Password
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
+          </div>
+          <div class="mb-5">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="confirmpassword">
+              Confirm Password
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="confirmpassword" type="password" placeholder="******************">
+          </div>
+          <div class="m-1">
+            <div class="text-red-600 text-sm font-bold" id = "passwordError">
+              {% comment %} error msg will come here {% endcomment %}
+            </div>  
+          </div>  
+          <div class="flex flex-col items-center justify-between">
+            <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mb-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+              Sign Up
+          </input>
+            <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="/">
+              Already have an account? login
+            </a>
+          </div>
+        </form>
+      </div>
+</div>    
+
+
+<script>
+  var form = document.getElementById('registerform')
+  form.addEventListener('submit',function(e){
+    e.preventDefault()
+    var address = document.getElementById('address').value
+    var name = document.getElementById('name').value
+    var email = document.getElementById('email').value
+    var password = document.getElementById('password').value
+    var confirmpassword = document.getElementById('confirmpassword').value
+    document.getElementById('passwordError').innerHTML =""
+
+    if(password==confirmpassword){
+      fetch("/api/register",{
+        method:'POST',
+        body:JSON.stringify({
+          name:name,
+          address:address,
+          email:email,
+          password:password
+        }),
+        headers:{
+          "Content-Type":"application/json; charset=UTF-8"
+        }
+      })
+      .then(function(response){
+        console.log("printing the reponse")
+        console.log(response['status'])
+        if(response['status'] != 200){
+          response.json().then( data =>{
+            console.log("printing the data")
+            console.log(data)
+            document.getElementById('passwordError').innerHTML =data['email'][0] 
+            console.log("failed 3")
+            document.getElementById('email').value = ""
+            document.getElementById('password').value = ""
+            document.getElementById('confirmpassword').value = ""
+          })
+        }
+        else{
+          location.replace('/profile')
+        }
+        
+      });
+
+    }
+    else{
+      console.log("error password and confirm password not same")
+      document.getElementById('passwordError').innerHTML = 'Password and confirmPassword are not same';
+    }
+    
+  
+  })
+  </script>  
+
+{% endblock %}

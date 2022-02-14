@@ -1,0 +1,206 @@
+{% extends './base.html' %}
+
+{% block title %} Dashboard {% endblock %}
+{% block head %}
+<script>
+  var email
+  var password
+    function loadData(){
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET","/api/user",true)
+        xmlhttp.onreadystatechange = function(){
+            if(xmlhttp.readyState === 4 && xmlhttp.status === 200){
+                var data = JSON.parse(xmlhttp.responseText);
+                console.log(data['email'])
+                    document.getElementById("name-view").innerHTML = data['name']
+                    document.getElementById("address-view").innerHTML = data['address']
+                    document.getElementById("email-view").innerHTML = data['email']
+                    email=data['email']
+            }
+            if(xmlhttp.status === 403){
+                location.replace('/')
+            }
+        }
+        xmlhttp.send();
+    }
+    window.onload = function(){
+        loadData();
+    }
+</script>    
+{% endblock %}
+
+{% block body %}
+    <div id="getdata">
+
+        <div class="flex flex-col items-center mt-20 place-content-center">
+          <div class="text-[30px]">
+            PROFILE ->
+          </div>  
+            <div class="text-[15px] flex flex-col items-center mt-20 place-content-center">
+              <div class = "flex flex-row items-center justify-between"><div>Email -></div> <div id="email-view"></div>
+              </div> 
+              <hr style="width:50%;">
+              <div class = "flex flex-row items-center justify-between">
+                <div>Name -></div> <div id="name-view"></div>
+              </div> 
+              <hr style="width:50%;">
+              <div class = "flex flex-row items-center justify-between"><div>Address -></div> <div id="address-view"></div>
+              </div>  
+              <hr style="width:50%;">
+            </div>    
+            {% comment %} Update form for user to be able to update his details {% endcomment %}
+            <div class="w-full max-w-xs">
+                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="updateform">
+
+                    Update the data
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                          Name
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" type="text" placeholder="name">
+                      </div>
+                      <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="address">
+                          Address
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="address" type="text" placeholder="address..">
+                      </div>   
+                      {% comment %} <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="address">
+                          email
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="address..">
+                      </div> {% endcomment %}
+                      <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="address">
+                          Password
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="password">
+                      </div> 
+                  <div class="flex flex-row items-center justify-between">
+                    <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mb-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                  </input>
+                  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mb-4 rounded focus:outline-none focus:shadow-outline" onclick="logout()">
+                    Logout
+                </button> 
+                  </div>
+                  <div class="flex flex-row item-center"> 
+                    <div class="m-1">
+                      <div class="text-red-600 text-sm font-bold" id = "passwordError">
+                      </div>  
+                    </div>
+                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mb-4 rounded focus:outline-none focus:shadow-outline" onclick = "deleteaccount()">
+                      Delete
+                    </button>  
+
+                  </div>  
+
+                </form>
+
+              </div>
+        </div>    
+               
+   
+    </div>
+
+
+    <script>
+{% comment %} For logout {% endcomment %}
+
+function logout() {
+    fetch("/api/logout",{
+        method:'POST',
+        body:JSON.stringify({
+            msg:"random"
+        }),
+        headers:{
+          "Content-Type":"application/json; charset=UTF-8"
+        }
+      })
+      .then(function(response){
+        return response.json()
+      })
+      .then(function(data){
+        console.log("success")
+        location.replace("/")
+      }).catch(function() {
+        document.getElementById('passwordError').innerHTML =data['email'][0]
+        console.log("error");
+    });
+  }
+{% comment %}  {% endcomment %}
+
+function deleteaccount(){
+  fetch("/api/delete",{
+    method:'POST',
+    body:JSON.stringify({
+        email:email
+    }),
+    headers:{
+      "Content-Type":"application/json; charset=UTF-8"
+    }
+  })
+  .then(function(response){
+    return response.json()
+  })
+  .then(function(data){
+    console.log("success")
+    location.replace("/")
+  }).catch(function() {
+    document.getElementById('Error').innerHTML =data[msg]
+    console.log("error");
+});
+}
+
+{% comment %} For Updating the form {% endcomment %}
+var form = document.getElementById('updateform')
+form.addEventListener('submit',function(e){
+  e.preventDefault()
+  var address = document.getElementById('address').value
+  var name = document.getElementById('name').value
+  var email = email
+  var password = document.getElementById('password').value
+  fetch("/api/update",{
+      method:'PUT',
+      body:JSON.stringify({
+        name:name,
+        address:address,
+        email:email,
+        password:password
+      }),
+      headers:{
+        "Content-Type":"application/json; charset=UTF-8"
+      }
+  })
+    .then(function(response){
+      console.log("printing the reponse")
+      console.log(response['status'])
+
+      if(response['status'] != 200){
+        console.log("inside error")
+        response.json().then( data =>{
+          console.log("printing the data")
+          console.log(data)
+          document.getElementById('Error').innerHTML =data['email'][0] 
+          console.log("failed 3")
+          document.getElementById('email').value = ""
+          document.getElementById('password').value = ""
+          document.getElementById('confirmpassword').value = ""
+        })
+      }
+      else{
+        console.log("updated")
+        response.json().then( data =>{
+          console.log("printing the data")
+          console.log(data)
+          document.getElementById("name-view").innerHTML = data['name']
+          document.getElementById("address-view").innerHTML = data['address']
+          document.getElementById("email-view").innerHTML = data['email']
+        })
+      }
+      
+    });
+  
+})
+    </script>    
+{% endblock %}
